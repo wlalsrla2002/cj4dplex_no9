@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>특별관 장르 적합도</title>
+<meta name="description" content="한국 KOBIS 좌석점유율로 찾은 특별관(4D·ScreenX) 적합 작품 특징을 해외 박스오피스 트렌드에 대입한 분석 대시보드 · 김지민 CJ 4DPLEX 사전과제">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  --font-anthropic-sans:"Pretendard","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+  --font-anthropic-serif:var(--font-anthropic-sans);
+  --color-bg:#ffffff;--color-fg:#191f28;--color-fg-muted:#6b7684;--color-panel:#f4f6f8;--color-border-line:#e5e8eb;
+  --color-ok:#14a37f;--color-warn:#e0b000;--color-bad:#d9435e;
+  --cds-chart-grid:#eef0f3;--cds-chart-axis:#b0b8c1;--cds-chart-reference:#8b95a1;--cds-chart-muted:#b0b8c1;
+  --cds-surface-popover:#ffffff;--cds-border:#e5e8eb;--cds-shadow-popover:0 6px 20px rgba(0,0,0,.10);--cds-text-secondary:#6b7684;
+  --cds-radius:10px;--cds-dur-slow:.4s;--cds-ease-out:cubic-bezier(.16,1,.3,1);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --color-bg:#111418;--color-fg:#eef0f3;--color-fg-muted:#9aa4b1;--color-panel:#1c2026;--color-border-line:#2b3038;
+  --cds-chart-grid:#252a31;--cds-chart-axis:#4a525d;--cds-chart-reference:#7a8592;--cds-chart-muted:#56606c;
+  --cds-surface-popover:#1c2026;--cds-border:#2b3038;--cds-shadow-popover:0 6px 20px rgba(0,0,0,.5);--cds-text-secondary:#9aa4b1;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --color-bg:#111418;--color-fg:#eef0f3;--color-fg-muted:#9aa4b1;--color-panel:#1c2026;--color-border-line:#2b3038;
+  --cds-chart-grid:#252a31;--cds-chart-axis:#4a525d;--cds-chart-reference:#7a8592;--cds-chart-muted:#56606c;
+  --cds-surface-popover:#1c2026;--cds-border:#2b3038;--cds-shadow-popover:0 6px 20px rgba(0,0,0,.5);--cds-text-secondary:#9aa4b1;
+  color-scheme:dark}
+html,body{margin:0}
+body{background:var(--color-bg);color:var(--color-fg);font-family:var(--font-anthropic-sans);font-size:15px}
+#dash-root{padding-block:8px 48px;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+@media (min-width:920px){#dash-root{padding-left:max(40px,env(safe-area-inset-left,0px));padding-right:max(40px,env(safe-area-inset-right,0px))}}
+.dash-select{appearance:none;-webkit-appearance:none;font:inherit;color:var(--color-fg);background-color:var(--color-panel);border:1px solid var(--color-border-line);border-radius:10px;padding:10px 38px 10px 14px;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%238b95a1' stroke-width='1.6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+.dash-select:focus-visible{outline:2px solid var(--color-fg);outline-offset:2px}
+.site-foot{max-width:82rem;margin:40px auto 0;font-size:12px;color:var(--color-fg-muted);line-height:1.6}
+</style>
+</head>
+<body>
+<div id="dash-root">
+<style>
+#dash-root .vz{font-family:var(--font-anthropic-sans);color:var(--color-fg);-webkit-font-smoothing:antialiased;word-break:keep-all;max-width:84rem;margin-inline:auto;container-type:inline-size}
+.vz *{box-sizing:border-box}
+.vz .top{position:sticky;top:0;z-index:5;background:var(--color-bg);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px;padding:18px 0 14px;border-bottom:1px solid var(--color-border-line)}
+.vz .ttl{margin:0;font-size:20px;font-weight:700;letter-spacing:-.01em}
+.vz .ttl small{display:block;font-size:13px;font-weight:500;color:var(--color-fg-muted);margin-top:3px;letter-spacing:0}
+.vz .filters{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center}
+.vz .seg{display:inline-flex;gap:3px;background:var(--color-panel);border-radius:11px;padding:3px}
+.vz .seg button{all:unset;cursor:pointer;padding:7px 12px;border-radius:8px;font-size:14px;font-weight:700;color:var(--color-fg-muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vz .seg button[aria-pressed=true]{background:var(--color-bg);color:var(--color-fg);box-shadow:0 0 0 1px var(--color-border-line)}
+.vz .seg button:focus-visible{outline:2px solid var(--color-fg);outline-offset:1px}
+.vz .seg-lab{font-size:12px;font-weight:600;color:var(--color-fg-muted);margin-right:2px}
+.vz .fgrp{display:inline-flex;align-items:center;gap:6px}
+.vz .band{display:flex;align-items:baseline;gap:12px;margin:40px 0 14px}
+.vz .band h2{margin:0;font-size:24px;font-weight:700;letter-spacing:-.02em}
+.vz .band{flex-wrap:wrap}
+.vz .band > span{font-size:13px;color:var(--color-fg-muted)}
+.vz .band-f{margin-left:auto;align-self:center}
+.vz .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
+.vz .card{grid-column:span 12;background:var(--color-panel);border-radius:20px;padding:20px 20px 16px;min-width:0;position:relative}
+@container (min-width:860px){.vz .w4{grid-column:span 4}.vz .w5{grid-column:span 5}.vz .w6{grid-column:span 6}.vz .w7{grid-column:span 7}.vz .w8{grid-column:span 8}.vz .w3{grid-column:span 3}}
+.vz .kpi.w4{grid-column:span 6;padding:16px}.vz .kpi.w4[data-k=all]{grid-column:span 12}
+@container (min-width:860px){.vz .kpi.w4,.vz .kpi.w4[data-k=all]{grid-column:span 4;padding:20px}}
+@container (max-width:559px){.vz .top{position:static}.vz .kpi .v{font-size:28px}.vz .kpi .s{font-size:12px}}
+.vz .ch{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.vz .ch h3{margin:0;font-size:16px;font-weight:700}
+.vz .ch .unit{font-size:12px;color:var(--color-fg-muted)}
+.vz .lg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--color-fg-muted);margin:-2px 0 8px}
+.vz .lg span{display:inline-flex;align-items:center;gap:6px}
+.vz .lg i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.vz .kpi{display:flex;flex-direction:column;gap:6px;justify-content:space-between}
+.vz .kpi .k{font-size:13px;font-weight:600;color:var(--color-fg-muted);display:flex;align-items:center;gap:7px}
+.vz .kpi .k i{width:9px;height:9px;border-radius:50%}
+.vz .kpi .v{font-size:clamp(30px,4vw,40px);font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1.1}
+.vz .kpi .v small{font-size:16px;font-weight:600;margin-left:2px;color:var(--color-fg-muted)}
+.vz .kpi .s{font-size:13px;color:var(--color-fg-muted);font-variant-numeric:tabular-nums}
+.vz .bar1{height:6px;border-radius:3px;background:var(--color-border-line);overflow:hidden;margin-top:4px}
+.vz .bar1 b{display:block;height:100%;border-radius:3px}
+.vz svg{display:block;overflow:visible}
+.vz svg text{font-family:var(--font-anthropic-sans)}
+.vz .tip{position:absolute;pointer-events:none;background:var(--cds-surface-popover);border:1px solid var(--cds-border);box-shadow:var(--cds-shadow-popover);border-radius:10px;padding:8px 11px;font-size:12px;line-height:1.5;min-width:120px;max-width:240px;z-index:3}
+.vz .tip .t{font-weight:700;font-size:13px;margin-bottom:2px}
+.vz .tip .ln{display:flex;align-items:center;gap:6px;color:var(--cds-text-secondary);font-variant-numeric:tabular-nums}
+.vz .tip .ln i{width:8px;height:8px;border-radius:2px;flex:none}
+.vz .foot{margin:36px 0 0;font-size:12px;color:var(--color-fg-muted);line-height:1.6}
+.vz .bk-hit{cursor:pointer}
+.vz .bk-hit:focus-visible{outline:none}
+.vz .bk-hit:focus-visible + .bk-focus{display:block}
+.vz .dr-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.vz .dr-head b{font-size:18px}
+.vz .dr-head span{font-size:13px;color:var(--color-fg-muted);font-variant-numeric:tabular-nums}
+.vz .dr-x{all:unset;cursor:pointer;margin-left:auto;font-size:13px;font-weight:600;color:var(--color-fg-muted);padding:6px 10px;border-radius:8px;background:var(--color-bg)}
+.vz .dr-x:hover{color:var(--color-fg)}
+.vz .dr-x:focus-visible{outline:2px solid var(--color-fg)}
+.vz .dr-wrap{overflow-x:auto}
+.vz table.dr{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+.vz table.dr th{text-align:left;font-size:12px;font-weight:600;color:var(--color-fg-muted);padding:6px 8px;border-bottom:1px solid var(--color-border-line);white-space:nowrap}
+.vz table.dr td{padding:7px 8px;border-bottom:1px solid var(--color-border-line);vertical-align:middle}
+.vz table.dr td.t{font-weight:600;max-width:16rem}
+.vz table.dr td.m{color:var(--color-fg-muted);white-space:nowrap}
+.vz table.dr td.b{width:26%;min-width:120px}
+.vz .bc{display:flex;align-items:center;gap:8px}
+.vz .bt{position:relative;flex:1;height:10px;border-radius:5px;background:var(--color-border-line);min-width:60px}
+.vz .bt b{position:absolute;left:0;top:0;bottom:0;border-radius:5px}
+.vz .bt i{position:absolute;top:-3px;bottom:-3px;width:1.5px;background:var(--cds-chart-reference)}
+.vz .bc span{width:2.6em;text-align:right;font-weight:700}
+.vz .bc span.no{font-weight:400;color:var(--color-fg-muted)}
+@container (max-width:559px){.vz table.dr .op{display:none}.vz table.dr td.b{min-width:90px}}
+</style>
+
+<div class="vz">
+  <header class="top">
+    <h1 class="ttl">특별관 장르 적합도<small>KOBIS 2024.01~2026.09 개봉 108편 · Box Office Mojo 등 12개 시장</small></h1>
+    <div class="filters">
+      <div class="fgrp"><span class="seg-lab">한국 포맷</span><div class="seg" role="group" aria-label="포맷" data-draw="fmt-seg"></div></div>
+    </div>
+  </header>
+
+  <div class="band"><h2>한국 특별관</h2><span>2024.01~2026.09 개봉 108편 전체 · 배수 = 특별관 ÷ 같은 영화 일반관</span></div>
+  <div class="grid">
+    <div class="card w4 kpi" data-draw="kpi" data-k="all" data-source="kr_films"></div>
+    <div class="card w4 kpi" data-draw="kpi" data-k="4D" data-source="kr_format"></div>
+    <div class="card w4 kpi" data-draw="kpi" data-k="ScreenX" data-source="kr_format"></div>
+
+    <div class="card w7">
+      <div class="ch"><h3>장르군별 배수</h3><span class="unit">중앙값 · 막대를 누르면 작품 목록</span></div>
+      <div class="lg" data-draw="lg-fmt2"></div>
+      <div data-draw="buckets" data-source="kr_buckets"></div>
+    </div>
+    <div class="card w5">
+      <div class="ch"><h3><span data-draw="fmt-name">—</span> 배수 상위 12편</h3><span class="unit">배</span></div>
+      <div class="lg" data-draw="lg-origin"></div>
+      <div data-draw="top" data-source="kr_films"></div>
+    </div>
+    <div class="card" style="display:none" id="drill-card">
+      <div data-draw="drill" data-source="kr_films"></div>
+    </div>
+  </div>
+
+  <div class="band"><h2>글로벌 박스오피스</h2><span>흥행 상위작 매출 비중</span><div class="fgrp band-f"><span class="seg-lab">연도</span><div class="seg" role="group" aria-label="연도" data-draw="yr-seg"></div></div></div>
+  <div class="grid">
+    <div class="card w6">
+      <div class="ch"><h3>장르별 비중 추이</h3><span class="unit">글로벌 Top50 매출 · 점선 = 2026년(11월 초까지)</span></div>
+      <div class="lg" data-draw="lg-genre"></div>
+      <div data-draw="gline" data-source="global_share"></div>
+    </div>
+    <div class="card w6">
+      <div class="ch"><h3>시장별 4D 적합 장르 비중 · <span data-draw="yr-name">—</span></h3><span class="unit">시장 Top20 매출</span></div>
+      <div class="lg" data-draw="lg-fit"></div>
+      <div data-draw="mstack" data-source="market_year"></div>
+    </div>
+  </div>
+
+  <p class="foot">출처: KOBIS 영화관 입장권 통합전산망(2026-11-07 조회), Box Office Mojo, 마오옌, TFAI, Ormax, Cinepoint · 2026년은 11월 초까지 · 4D 적합 = 한국 4D 배수 1.2배 이상 장르군 · 참고: IMAX 0.87배</p>
+</div>
+
+<p class="site-foot">분석·제작: 김지민 (CJ 4DPLEX 사전과제) · 코드 작성과 대시보드 제작에 AI(Claude) 활용</p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="assets/dash.js"></script>
+<script>
+(() => {
+  const FIT = 1.2;
+  const rowsOf = (id) => { const d = dash.data(id); return d.status === 'ok' ? d.data : null; };
+  const P = () => { const p = dash.params(); return {year: p.year || '2026', fmt: p.fmt === 'sx' ? 'sx' : 'd4'}; };
+  const FMT = {d4: '4D', sx: 'ScreenX', imax: 'IMAX'};
+  const FKEY = {'4D': 'd4', ScreenX: 'sx', IMAX: 'imax'};
+  const col = () => ({d4: dash.colors[0], sx: dash.colors[1], imax: dash.colors[2], muted: 'var(--cds-chart-muted)'});
+  const ORIG = ['일본 애니', '할리우드', '한국', '기타'];
+  const ocol = (o) => ({'일본 애니': dash.colors[0], '할리우드': dash.colors[7], '한국': dash.colors[5], '기타': 'var(--cds-chart-muted)'})[o] || 'var(--cds-chart-muted)';
+  const HL = {'일본 애니': () => dash.colors[0], '액션·어드벤처': () => dash.colors[3], '슈퍼히어로': () => dash.colors[6]};
+  const fitCol = (i) => [dash.colors[0], dash.colors[3], dash.colors[6], dash.colors[2]][i % 4];
+  const r2 = d3.format('.2f'), p0 = d3.format('.0%'), p1 = d3.format('.1%');
+  const pp = (d) => (d >= 0 ? '+' : '−') + Math.abs(d * 100).toFixed(1) + '%p';
+  const W = (el) => Math.max(260, el.clientWidth);
+  const fg = (s) => s.style('fill', 'var(--color-fg)');
+  const mu = (s) => s.style('fill', 'var(--color-fg-muted)');
+
+  function tip(el) {
+    const card = el.closest('.card');
+    let t = card.querySelector(':scope > .tip');
+    if (!t) { t = document.createElement('div'); t.className = 'tip'; t.hidden = true; card.appendChild(t); }
+    return {
+      show(ev, title, lines) {
+        t.replaceChildren();
+        const h = document.createElement('div'); h.className = 't'; h.textContent = title; t.appendChild(h);
+        lines.forEach(([c, txt]) => {
+          const ln = document.createElement('div'); ln.className = 'ln';
+          if (c) { const i = document.createElement('i'); i.style.background = c; ln.appendChild(i); }
+          const s = document.createElement('span'); s.textContent = txt; ln.appendChild(s); t.appendChild(ln);
+        });
+        t.hidden = false;
+        const r = card.getBoundingClientRect();
+        const x = ev.clientX - r.left, y = ev.clientY - r.top;
+        t.style.left = Math.max(8, Math.min(r.width - t.offsetWidth - 8, x + 14)) + 'px';
+        t.style.top = Math.max(8, y - t.offsetHeight - 12) + 'px';
+      },
+      hide() { t.hidden = true; },
+    };
+  }
+  const svgOf = (el, w, h, label) => {
+    el.replaceChildren();
+    return d3.select(el).append('svg').attr('width', w).attr('height', h).attr('viewBox', `0 0 ${w} ${h}`).attr('role', 'img').attr('aria-label', label);
+  };
+  const empty = (el, msg) => { el.replaceChildren(); const p = document.createElement('p'); p.className = 'unit'; p.style.cssText = 'margin:0;font-size:13px;color:var(--color-fg-muted)'; p.textContent = msg; el.appendChild(p); };
+  const logAxis = (g, sc, ticks, fmt) => {
+    g.selectAll('text.tk').data(ticks).join('text').attr('class', 'tk').attr('x', (d) => sc(d)).attr('text-anchor', 'middle').attr('font-size', 11).text(fmt).call(mu);
+  };
+  const refLine = (svg, x1, y1, x2, y2) => svg.append('line').attr('x1', x1).attr('y1', y1).attr('x2', x2).attr('y2', y2)
+    .attr('stroke', 'var(--cds-chart-reference)').attr('stroke-dasharray', '4 3').attr('stroke-width', 1);
+
+  // ---------- 필터 ----------
+  function segment(el, items, key, cur) {
+    el.replaceChildren();
+    items.forEach(([v, label]) => {
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = label;
+      b.setAttribute('aria-pressed', String(v === cur));
+      b.addEventListener('click', () => dash.setParams({[key]: v}));
+      el.appendChild(b);
+    });
+  }
+  dash.draw('yr-seg', (el) => segment(el, [['2024', '2024'], ['2025', '2025'], ['2026', '2026']], 'year', P().year));
+  dash.draw('fmt-seg', (el) => segment(el, [['d4', '4D'], ['sx', 'ScreenX']], 'fmt', P().fmt));
+  dash.draw('fmt-name', (el) => { el.textContent = FMT[P().fmt]; });
+  dash.draw('yr-name', (el) => { el.textContent = P().year + '년' + (P().year === '2026' ? '(11월 초까지)' : ''); });
+
+  // ---------- 범례 ----------
+  const legend = (el, items) => {
+    el.replaceChildren();
+    items.forEach(([c, t]) => { const s = document.createElement('span'); const i = document.createElement('i'); i.style.background = c; s.append(i, document.createTextNode(t)); el.appendChild(s); });
+  };
+  dash.draw('lg-fmt2', (el) => legend(el, [[col().d4, '4D'], [col().sx, 'ScreenX']]));
+  dash.draw('lg-origin', (el) => legend(el, ORIG.map((o) => [ocol(o), o])));
+  dash.draw('lg-genre', (el) => legend(el, [...Object.keys(HL).map((k) => [HL[k](), k]), ['var(--cds-chart-muted)', '그 외 장르']]));
+  const fitBuckets = () => {
+    const b = rowsOf('kr_buckets'); if (!b) return [];
+    return b.filter((r) => +r.ratio_4d >= FIT).sort((a, c) => c.ratio_4d - a.ratio_4d).map((r) => r.bucket);
+  };
+  dash.draw('lg-fit', (el) => legend(el, fitBuckets().map((b, i) => [fitCol(i), b])));
+
+  // ---------- KPI ----------
+  dash.draw('kpi', (el) => {
+    el.replaceChildren();
+    const k = el.dataset.k;
+    const mk = (cls, txt) => { const d = document.createElement('div'); d.className = cls; if (txt != null) d.textContent = txt; return d; };
+    if (k === 'all') {
+      const f = rowsOf('kr_films'); if (!f) return;
+      const head = mk('k', '분석 영화');
+      const v = mk('v', String(f.length)); const sm = document.createElement('small'); sm.textContent = '편'; v.appendChild(sm);
+      const by = d3.rollup(f, (a) => a.length, (r) => r.origin);
+      el.append(head, v, mk('s', ORIG.filter((o) => by.get(o)).map((o) => `${o} ${by.get(o)}`).join(' · ')));
+      return;
+    }
+    const r = (rowsOf('kr_format') || []).find((x) => x.format === k); if (!r) return;
+    const c = col()[FKEY[k]];
+    const head = mk('k'); const dot = document.createElement('i'); dot.style.background = c; head.append(dot, document.createTextNode(k + ' 배수 중앙값'));
+    const v = mk('v', r2(+r.median_ratio)); const sm = document.createElement('small'); sm.textContent = '배'; v.appendChild(sm);
+    const s = mk('s', `일반관보다 잘 찬 영화 ${p0(+r.share_above_1)} · ${r.films}편`);
+    const bar = mk('bar1'); const b = document.createElement('b'); b.style.width = (+r.share_above_1 * 100) + '%'; b.style.background = c; bar.appendChild(b);
+    el.append(head, v, s, bar);
+  });
+
+  // ---------- 장르군별 배수 ----------
+  dash.draw('buckets', (el) => {
+    const b = rowsOf('kr_buckets'); if (!b) return;
+    const rows = [...b].sort((a, c) => c.ratio_4d - a.ratio_4d);
+    const sel = dash.params().bucket || null;
+    const w = W(el), bh = 15, gap = 4, grp = bh * 2 + gap + 26, labH = 18, top = 4, h = top + rows.length * grp + 20;
+    const svg = svgOf(el, w, h, '장르군별 4D·ScreenX 점유율 배수');
+    const x = d3.scaleLinear().domain([0, Math.max(2.2, d3.max(rows, (r) => Math.max(+r.ratio_4d, +r.ratio_screenx)) * 1.1)]).range([0, w - 44]);
+    const T = tip(el);
+    const pick = (name) => {
+      dash.setParams({bucket: sel === name ? null : name});
+      if (sel !== name) requestAnimationFrame(() => requestAnimationFrame(() => {
+        const c = document.getElementById('drill-card'); if (c) c.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+      }));
+    };
+    rows.forEach((r, i) => {
+      const y0 = top + i * grp;
+      const on = !sel || sel === r.bucket;
+      const g = svg.append('g').style('opacity', on ? 1 : 0.32);
+      if (sel === r.bucket) g.append('rect').attr('x', -8).attr('y', y0 - 4).attr('width', w + 8).attr('height', grp - 6).attr('rx', 10).attr('fill', 'var(--color-bg)');
+      fg(g.append('text').attr('x', 0).attr('y', y0 + 11).attr('font-size', 13).style('font-weight', 600).text(r.bucket + (sel === r.bucket ? '  ▾' : '')));
+      [['d4', +r.ratio_4d], ['sx', +r.ratio_screenx]].forEach(([k, v], j) => {
+        const y = y0 + labH + j * (bh + gap);
+        g.append('rect').attr('x', 0).attr('y', y).attr('width', Math.max(1, x(v))).attr('height', bh).attr('rx', 3).attr('fill', col()[k])
+          .attr('fill-opacity', v >= 1 ? 1 : 0.45);
+        fg(g.append('text').attr('x', x(v) + 5).attr('y', y + bh - 2).attr('font-size', 11).style('font-weight', 700).style('font-variant-numeric', 'tabular-nums').text(r2(v)));
+      });
+      svg.append('rect').attr('class', 'bk-hit').attr('x', -8).attr('y', y0 - 4).attr('width', w + 8).attr('height', grp - 6).attr('fill', 'transparent')
+        .attr('tabindex', 0).attr('role', 'button').attr('aria-pressed', String(sel === r.bucket)).attr('aria-label', `${r.bucket} 작품 목록 보기`)
+        .on('pointermove', (ev) => T.show(ev, r.bucket, [[col().d4, `4D ${r2(+r.ratio_4d)}배`], [col().sx, `ScreenX ${r2(+r.ratio_screenx)}배`], [null, '눌러서 작품 보기']]))
+        .on('pointerleave', T.hide)
+        .on('click', () => { T.hide(); pick(r.bucket); })
+        .on('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); pick(r.bucket); } });
+    });
+    refLine(svg, x(1), top + 12, x(1), h - 16).style('pointer-events', 'none');
+    mu(svg.append('text').attr('x', x(1)).attr('y', h - 2).attr('text-anchor', 'middle').attr('font-size', 11).text('1배'));
+  });
+
+  // ---------- 장르 작품 목록 (드릴다운) ----------
+  dash.draw('drill', (el) => {
+    const card = el.closest('.card');
+    const sel = dash.params().bucket;
+    const f = rowsOf('kr_films'), bk = rowsOf('kr_buckets');
+    if (!sel || !f || !bk) { card.style.display = 'none'; el.replaceChildren(); return; }
+    const info = bk.find((r) => r.bucket === sel);
+    const films = f.filter((r) => r.bucket === sel);
+    if (!info || !films.length) { card.style.display = 'none'; el.replaceChildren(); return; }
+    card.style.display = '';
+    const k = P().fmt, other = k === 'd4' ? 'sx' : 'd4';
+    const val = (r, key) => r[key + '_ratio'] === '' ? null : +r[key + '_ratio'];
+    films.sort((a, c) => (val(c, k) ?? -1) - (val(a, k) ?? -1));
+    el.replaceChildren();
+    const head = document.createElement('div'); head.className = 'dr-head';
+    const bb = document.createElement('b'); bb.textContent = sel;
+    const sp = document.createElement('span');
+    const n4 = films.filter((r) => val(r, 'd4') != null).length, nx = films.filter((r) => val(r, 'sx') != null).length;
+    sp.textContent = `4D ${r2(+info.ratio_4d)}배 (${n4}편) · ScreenX ${r2(+info.ratio_screenx)}배 (${nx}편)`;
+    const x = document.createElement('button'); x.type = 'button'; x.className = 'dr-x'; x.textContent = '닫기 ✕';
+    x.addEventListener('click', () => dash.setParams({bucket: null}));
+    head.append(bb, sp, x); el.appendChild(head);
+    const max = Math.max(3, d3.max(films, (r) => Math.max(val(r, 'd4') ?? 0, val(r, 'sx') ?? 0)));
+    const wrap = document.createElement('div'); wrap.className = 'dr-wrap';
+    const tb = document.createElement('table'); tb.className = 'dr';
+    const order = k === 'd4' ? ['d4', 'sx'] : ['sx', 'd4'];
+    const th = document.createElement('thead'); const htr = document.createElement('tr');
+    [['작품', ''], ['개봉', 'op'], ['관객', ''], ...order.map((o) => [FMT[o] + ' 배수', ''])].forEach(([t, c]) => { const e = document.createElement('th'); e.textContent = t; if (c) e.className = c; htr.appendChild(e); });
+    th.appendChild(htr); tb.appendChild(th);
+    const body = document.createElement('tbody');
+    const aud = (n) => n >= 10000 ? d3.format(',')(Math.round(n / 10000)) + '만' : d3.format(',')(n);
+    films.forEach((r) => {
+      const tr = document.createElement('tr');
+      const td = (txt, cls) => { const e = document.createElement('td'); if (cls) e.className = cls; e.textContent = txt; tr.appendChild(e); return e; };
+      td(r.title, 't'); td(r.open.slice(0, 7).replace('-', '.'), 'm op'); td(aud(+r.total_aud), 'm');
+      order.forEach((o) => {
+        const e = td('', 'b'); const v = val(r, o);
+        const bc = document.createElement('div'); bc.className = 'bc';
+        const bt = document.createElement('div'); bt.className = 'bt';
+        const one = document.createElement('i'); one.style.left = (100 / max) + '%'; bt.appendChild(one);
+        const s2 = document.createElement('span');
+        if (v != null) {
+          const fill = document.createElement('b'); fill.style.width = Math.min(100, v / max * 100) + '%'; fill.style.background = col()[o]; fill.style.opacity = v >= 1 ? 1 : 0.45;
+          bt.prepend(fill); s2.textContent = r2(v);
+        } else { s2.textContent = '–'; s2.className = 'no'; }
+        bc.append(bt, s2); e.appendChild(bc);
+      });
+      body.appendChild(tr);
+    });
+    tb.appendChild(body); wrap.appendChild(tb); el.appendChild(wrap);
+  });
+
+  // ---------- 상위 12편 ----------
+  dash.draw('top', (el) => {
+    const f = rowsOf('kr_films'); if (!f) return;
+    const k = P().fmt;
+    const rows = f.filter((r) => r[k + '_ratio'] !== '').map((r) => ({r, v: +r[k + '_ratio']})).sort((a, b) => b.v - a.v).slice(0, 12);
+    const w = W(el), bh = 24, gap = 6, h = rows.length * (bh + gap);
+    const svg = svgOf(el, w, h, FMT[k] + ' 배수 상위 영화');
+    const labW = Math.min(150, w * 0.42);
+    const x = d3.scaleLinear().domain([0, d3.max(rows, (d) => d.v) * 1.12]).range([0, w - labW - 4]);
+    const T = tip(el);
+    rows.forEach((d, i) => {
+      const y = i * (bh + gap);
+      const t = svg.append('text').attr('x', labW - 8).attr('y', y + bh / 2 + 4).attr('text-anchor', 'end').attr('font-size', 12).text(d.r.title).call(fg);
+      let s = d.r.title; while (t.node().getComputedTextLength() > labW - 10 && s.length > 2) { s = s.slice(0, -1); t.text(s + '…'); }
+      svg.append('rect').attr('x', labW).attr('y', y).attr('width', Math.max(1, x(d.v))).attr('height', bh).attr('rx', 4).attr('fill', ocol(d.r.origin))
+        .on('pointermove', (ev) => T.show(ev, d.r.title, [[ocol(d.r.origin), `${FMT[k]} ${r2(d.v)}배`], [null, `${d.r.origin} · ${d.r.type}`]])).on('pointerleave', T.hide);
+      fg(svg.append('text').attr('x', labW + x(d.v) + 5).attr('y', y + bh / 2 + 4).attr('font-size', 12).style('font-weight', 700).style('font-variant-numeric', 'tabular-nums').text(r2(d.v)));
+    });
+  });
+
+  // ---------- 글로벌 장르 비중 막대 ----------
+  const gcol = (cat) => HL[cat] ? HL[cat]() : 'var(--cds-chart-muted)';
+  // ---------- 글로벌 추이 ----------
+  dash.draw('gline', (el) => {
+    const g = rowsOf('global_share'); if (!g) return;
+    const yrs = [...new Set(g.map((r) => r.year))].sort();
+    const series = d3.groups(g, (r) => r.category).map(([c, a]) => ({c, pts: yrs.map((y) => { const r = a.find((x) => x.year === y); return {y, v: r ? +r.share : 0}; })}));
+    series.sort((a, b) => (HL[a.c] ? 1 : 0) - (HL[b.c] ? 1 : 0));
+    const w = W(el), h = 330, padL = 40, padR = 96, padT = 10, padB = 26;
+    const svg = svgOf(el, w, h, '장르별 매출 비중 추이');
+    const x = d3.scalePoint().domain(yrs).range([padL + 6, w - padR]);
+    const y = d3.scaleLinear().domain([0, Math.max(0.3, d3.max(g, (r) => +r.share) * 1.08)]).nice().range([h - padB, padT]);
+    const yt = y.ticks(5);
+    svg.append('g').selectAll('line').data(yt).join('line').attr('x1', padL).attr('x2', w - padR + 6).attr('y1', y).attr('y2', y).attr('stroke', 'var(--cds-chart-grid)');
+    svg.append('g').selectAll('text').data(yt).join('text').attr('x', padL - 6).attr('y', (d) => y(d) + 4).attr('text-anchor', 'end').attr('font-size', 11).text(p0).call(mu);
+    svg.append('g').selectAll('text').data(yrs).join('text').attr('x', x).attr('y', h - 6).attr('text-anchor', 'middle').attr('font-size', 11)
+      .style('font-weight', (d) => d === P().year ? 700 : 400).text((d) => d === '2026' ? '2026*' : d).call((s) => s.style('fill', (d) => d === P().year ? 'var(--color-fg)' : 'var(--color-fg-muted)'));
+    svg.append('line').attr('x1', x(P().year)).attr('x2', x(P().year)).attr('y1', padT).attr('y2', h - padB).attr('stroke', 'var(--color-border-line)').attr('stroke-width', 8).attr('stroke-opacity', 0.6).lower();
+    const T = tip(el);
+    const ends = [];
+    series.forEach((s) => {
+      const c = gcol(s.c), hl = !!HL[s.c];
+      const ln = d3.line().x((p) => x(p.y)).y((p) => y(p.v));
+      const full = s.pts.slice(0, -1), part = s.pts.slice(-2);
+      svg.append('path').datum(full).attr('fill', 'none').attr('stroke', c).attr('stroke-width', hl ? 3 : 1.5).attr('stroke-opacity', hl ? 1 : 0.7).attr('d', ln);
+      svg.append('path').datum(part).attr('fill', 'none').attr('stroke', c).attr('stroke-width', hl ? 3 : 1.5).attr('stroke-opacity', hl ? 1 : 0.7).attr('stroke-dasharray', '5 4').attr('d', ln);
+      svg.append('g').selectAll('circle').data(s.pts).join('circle').attr('cx', (p) => x(p.y)).attr('cy', (p) => y(p.v)).attr('r', hl ? 4 : 3).attr('fill', c)
+        .on('pointermove', (ev, p) => T.show(ev, `${s.c} · ${p.y}`, [[c, `비중 ${p1(p.v)}`], ...(p.y === '2026' ? [[null, '11월 초까지 집계']] : [])])).on('pointerleave', T.hide);
+      ends.push({c: s.c, col: hl ? c : 'var(--color-fg-muted)', y: y(s.pts[s.pts.length - 1].v), hl});
+    });
+    ends.sort((a, b) => a.y - b.y);
+    for (let i = 1; i < ends.length; i++) if (ends[i].y - ends[i - 1].y < 12) ends[i].y = ends[i - 1].y + 12;
+    ends.forEach((e) => svg.append('text').attr('x', w - padR + 10).attr('y', e.y + 4).attr('font-size', 11).style('font-weight', e.hl ? 700 : 400).style('fill', e.col).text(e.c));
+  });
+
+  // ---------- 시장별 4D 적합 장르 (누적) ----------
+  dash.draw('mstack', (el) => {
+    const m = rowsOf('market_year'); if (!m) return;
+    const fb = fitBuckets(); if (!fb.length) return;
+    const yr = P().year;
+    const cur = m.filter((r) => r.year === yr);
+    if (!cur.length) return empty(el, yr + '년 데이터 없음');
+    const mk = d3.groups(cur, (r) => r.market).map(([mkt, a]) => {
+      const seg = fb.map((b) => { const r = a.find((x) => x.bucket === b); return {b, v: r ? +r.share : 0}; });
+      return {mkt, seg, tot: d3.sum(seg, (s) => s.v)};
+    }).sort((a, b) => b.tot - a.tot);
+    const w = W(el), bh = 20, gap = 7, labW = 64, h = mk.length * (bh + gap) + 18;
+    const svg = svgOf(el, w, h, yr + '년 시장별 4D 적합 장르 비중');
+    const x = d3.scaleLinear().domain([0, Math.max(0.5, d3.max(mk, (d) => d.tot) * 1.12)]).nice().range([0, w - labW - 44]);
+    x.ticks(4).filter((t) => t > 0).forEach((t) => {
+      svg.append('line').attr('x1', labW + x(t)).attr('x2', labW + x(t)).attr('y1', 0).attr('y2', h - 18).attr('stroke', 'var(--cds-chart-grid)');
+      mu(svg.append('text').attr('x', labW + x(t)).attr('y', h - 3).attr('text-anchor', 'middle').attr('font-size', 11).text(p0(t)));
+    });
+    const T = tip(el);
+    mk.forEach((d, i) => {
+      const y = i * (bh + gap);
+      fg(svg.append('text').attr('x', labW - 8).attr('y', y + bh / 2 + 4).attr('text-anchor', 'end').attr('font-size', 12).style('font-weight', 600).text(d.mkt));
+      let acc = 0;
+      d.seg.forEach((s, j) => {
+        if (s.v > 0) svg.append('rect').attr('x', labW + x(acc)).attr('y', y).attr('width', Math.max(0.5, x(s.v) - 1)).attr('height', bh).attr('fill', fitCol(j))
+          .attr('rx', 2)
+          .on('pointermove', (ev) => T.show(ev, `${d.mkt} · ${yr}`, [...d.seg.map((q, jj) => [fitCol(jj), `${q.b} ${p0(q.v)}`]), [null, `합계 ${p0(d.tot)}`]])).on('pointerleave', T.hide);
+        acc += s.v;
+      });
+      fg(svg.append('text').attr('x', labW + x(acc) + 5).attr('y', y + bh / 2 + 4).attr('font-size', 12).style('font-weight', 700).style('font-variant-numeric', 'tabular-nums').text(p0(d.tot)));
+    });
+  });
+
+})();
+</script>
+</body>
+</html>
